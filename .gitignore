@@ -5,6 +5,7 @@ Mutagenicity
 
 # Files
 *.csv
+*.pickle
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
