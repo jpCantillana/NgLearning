@@ -2,10 +2,12 @@
 data/
 export/
 Mutagenicity
+LinkPredictionExample/
 
 # Files
 *.csv
 *.pickle
+*.zip
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
