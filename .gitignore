@@ -3,6 +3,7 @@ data/
 export/
 Mutagenicity
 LinkPredictionExample/
+data_mnist/
 
 # Files
 *.csv
