@@ -9,6 +9,7 @@ data_mnist/
 *.csv
 *.pickle
 *.zip
+*.db
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
