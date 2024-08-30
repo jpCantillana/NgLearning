@@ -332,9 +332,9 @@ class CreateModels:
         torch.save(self.model_ls, 'classifier.pth')
 
 
-if __name__ == "__main__":
-    instances_folder = "export"
-    ng_sets_file = "ng_outs.csv"
-    trainer = CreateModels(instances_folder, ng_sets_file)
-    trainer.classification_model_train()
-    trainer.store_models()
+
+instances_folder = "export"
+ng_sets_file = "ng_outs.csv"
+trainer = CreateModels(instances_folder, ng_sets_file)
+trainer.classification_model_train()
+trainer.store_models()
