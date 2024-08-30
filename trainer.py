@@ -133,7 +133,7 @@ class CreateModels:
 
         ng_dict = {}
         cnt = -1
-        with open("{self.ng_outs.csv}", 'r') as text_file:
+        with open("{self.ng_sets_file}", 'r') as text_file:
             for line in text_file:
                 if cnt < 2:
                     cnt += 1
