@@ -10,6 +10,7 @@ data_mnist/
 *.pickle
 *.zip
 *.db
+*.pth
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
