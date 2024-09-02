@@ -1,15 +1,54 @@
 import torch
 from torch_geometric.data import Data
 from torch_geometric.nn import knn_graph
+import sys
+from torch_geometric.nn import GCNConv
 
-instance_name = "JLA000011"
-folder = "./export/"
-ng_outs_file = "ng_hard_instances.csv"
-ng_outs_folder = "ng_sets/"
-output_file = instance_name + "_ngset.txt"
+instance_name = sys.argv[1]
+ng_outs_file = sys.argv[2]
+output_file = sys.argv[3] + ".nbh"
+
+class Deep(torch.nn.Module):
+    def __init__(self):
+        super().__init__()
+        self.layer1 = torch.nn.Linear(142, 142)
+        self.act1 = torch.nn.ReLU()
+        # self.layer1_1 = nn.Linear(284, 142)
+        # self.act1_1 = nn.ReLU()
+        self.layer2 = torch.nn.Linear(142, 71)
+        self.act2 = torch.nn.ReLU()
+        self.layer3 = torch.nn.Linear(71, 71)
+        self.act3 = torch.nn.ReLU()
+        self.output = torch.nn.Linear(71, 1)
+        self.sigmoid = torch.nn.Sigmoid()
+ 
+    def forward(self, x):
+        x = self.act1(self.layer1(x))
+        # x = self.act1_1(self.layer1_1(x))
+        x = self.act2(self.layer2(x))
+        x = self.act3(self.layer3(x))
+        x = self.sigmoid(self.output(x))
+        return x
+
+class Net(torch.nn.Module):
+    def __init__(self, in_channels, hidden_channels, out_channels):
+        super().__init__()
+        self.conv1 = GCNConv(in_channels, hidden_channels)
+        self.conv2 = GCNConv(hidden_channels, out_channels)
+
+    def encode(self, x, edge_index):
+        x = self.conv1(x, edge_index).relu()
+        return self.conv2(x, edge_index)
+
+    def decode(self, z, edge_label_index):
+        return (z[edge_label_index[0]] * z[edge_label_index[1]]).sum(dim=-1)
+
+    def decode_all(self, z):
+        prob_adj = z @ z.t()
+        return (prob_adj > 0).nonzero(as_tuple=False).t()
 
 individual_instance = {}
-with open(folder+instance_name+".txt", 'r') as text_file:
+with open(instance_name+".txt", 'r') as text_file:
     cnt = 0
     instance = ""
     for line in text_file:
@@ -25,7 +64,7 @@ with open(folder+instance_name+".txt", 'r') as text_file:
 
 ng_dict_aux = {}
 cnt = -1
-with open(ng_outs_folder+ng_outs_file, 'r') as text_file:
+with open(ng_outs_file, 'r') as text_file:
     for line in text_file:
         if cnt < 2:
             cnt += 1
@@ -72,5 +111,5 @@ with open(output_file, "w") as output_file:
                     line += ",1"
                 else:
                     line+="1"
-        line += "\n"
+        line += ";"
         output_file.write(line)
