@@ -5,8 +5,7 @@ import sys
 from torch_geometric.nn import GCNConv
 
 instance_name = sys.argv[1]
-ng_outs_file = sys.argv[2]
-output_file = sys.argv[3] + ".nbh"
+output_file = sys.argv[2]
 
 class Deep(torch.nn.Module):
     def __init__(self):
@@ -48,7 +47,7 @@ class Net(torch.nn.Module):
         return (prob_adj > 0).nonzero(as_tuple=False).t()
 
 individual_instance = {}
-with open(instance_name+".txt", 'r') as text_file:
+with open(instance_name, 'r') as text_file:
     cnt = 0
     instance = ""
     for line in text_file:
@@ -62,25 +61,8 @@ with open(instance_name+".txt", 'r') as text_file:
         individual_instance[instance].append([int(i) for i in split_line])
     text_file.close()
 
-ng_dict_aux = {}
-cnt = -1
-with open(ng_outs_file, 'r') as text_file:
-    for line in text_file:
-        if cnt < 2:
-            cnt += 1
-            continue
-        raw_line = line.strip()
-        split_line_list = raw_line.split(sep=";")
-        instance = split_line_list[3]
-        if instance not in ng_dict_aux:
-            ng_dict_aux[instance] = [[0 for i in range(101)]]
-        ng_dict_aux[instance].append([0] + [int(i) for i in split_line_list[5:-1]])
-        if len(split_line_list[5:-1]) != 100:
-            print("case found for instance "+instance)
-    text_file.close()
-
-instance = individual_instance[instance_name]
-y = torch.tensor(ng_dict_aux[instance_name], dtype=torch.float)
+instance_id = instance_name[:-4]
+instance = individual_instance[instance_id]
 x = torch.tensor(instance, dtype=torch.float)
 pos = []
 tw_sets_dict = {}
@@ -88,7 +70,7 @@ for i in instance:
     pos.append([i[1], i[2]])
 pos = torch.tensor(pos, dtype=torch.double)
 edge_index = knn_graph(pos, 15)
-raw_instance = Data(x=x, y=y, edge_index=edge_index, pos=pos)
+raw_instance = Data(x=x, edge_index=edge_index, pos=pos)
 
 model_ed = torch.load('encoder_decoder.pth')
 model_ls = torch.load('classifier.pth')
@@ -103,7 +85,6 @@ with open(output_file, "w") as output_file:
                     line += ","
                 node_i = z_raw[i].tolist() + raw_instance.x[i].tolist()
                 node_j = z_raw[j].tolist() + raw_instance.x[j].tolist()
-                target = raw_instance.y[i][j]
                 prediction = (1 if model_ls(torch.tensor(node_i+node_j, dtype=torch.float)) > 0.5 else 0)
                 line += str(prediction)
             else:
