@@ -61,7 +61,7 @@ with open(instance_name, 'r') as text_file:
         individual_instance[instance].append([int(i) for i in split_line])
     text_file.close()
 
-instance_id = instance_name[:-4]
+instance_id = (instance_name[:-4]).split("/")[-1].split("\\")[-1]
 instance = individual_instance[instance_id]
 x = torch.tensor(instance, dtype=torch.float)
 pos = []
@@ -85,7 +85,7 @@ with open(output_file, "w") as output_file:
                     line += ","
                 node_i = z_raw[i].tolist() + raw_instance.x[i].tolist()
                 node_j = z_raw[j].tolist() + raw_instance.x[j].tolist()
-                prediction = (1 if model_ls(torch.tensor(node_i+node_j, dtype=torch.float)) > 0.2 else 0)
+                prediction = (1 if (model_ls(torch.tensor(node_i+node_j, dtype=torch.float)) > 0.9) else 0)
                 line += str(prediction)
             else:
                 if j > 1:
